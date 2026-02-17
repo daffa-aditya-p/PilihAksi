@@ -150,105 +150,170 @@ export const ACHIEVEMENTS: Achievement[] = [
   }
 ];
 
-// NEW AI PROFILES - The "Oracle" Logic v2.0 (More granular)
+// --- 4-BIT BINARY CLASSIFICATION SYSTEM (16 TYPES) ---
+// We calculate a 4-digit binary code based on whether a stat is High (>50) or Low (<50).
+// Order: L - E - K - P (Lingkungan, Ekonomi, Kebahagiaan, Pengetahuan)
+
 export const getPsychologicalProfile = (stats: Stats): PsychologicalProfile => {
-    const { Lingkungan, Ekonomi, Kebahagiaan, Pengetahuan } = stats;
-    const total = Lingkungan + Ekonomi + Kebahagiaan + Pengetahuan;
-    const variance = Math.max(Lingkungan, Ekonomi, Kebahagiaan, Pengetahuan) - Math.min(Lingkungan, Ekonomi, Kebahagiaan, Pengetahuan);
+    const threshold = 50;
+    
+    // Create Binary Signature: 1 for High, 0 for Low
+    const L = stats.Lingkungan >= threshold ? '1' : '0';
+    const E = stats.Ekonomi >= threshold ? '1' : '0';
+    const H = stats.Kebahagiaan >= threshold ? '1' : '0'; // K for Kebahagiaan inside key
+    const P = stats.Pengetahuan >= threshold ? '1' : '0'; // P for Pengetahuan
+    
+    const signature = `${L}${E}${H}${P}`;
 
-    // 1. The Machiavellian (High Eco, Low Hap, Low Env)
-    if (Ekonomi > 80 && Kebahagiaan < 40) {
-        return {
-            title: "The Ruthless Pragmatist",
-            subtitle: "Machiavellian Sovereign",
-            analysis: "Anda adalah definisi 'tujuan menghalalkan cara'. Empati bagi Anda adalah kelemahan struktural. Anda membangun imperium emas di atas tulang belulang warga yang 'kurang produktif'. Efisien, namun menakutkan.",
-            mbtiMatch: "ENTJ-A (Commander)",
-            weakness: "Revolusi berdarah dari kelas bawah.",
-            color: "from-amber-800 to-red-950"
-        };
-    }
-
-    // 2. The Tech-Accelerationist (High Kno + Eco, Very Low Env + Hap)
-    if (Pengetahuan > 80 && Ekonomi > 60 && Lingkungan < 30) {
-        return {
-            title: "The Silicon Despot",
-            subtitle: "Post-Human Architect",
-            analysis: "Anda telah meninggalkan kemanusiaan demi kemajuan. Bagi Anda, kota ini bukan rumah, tapi laboratorium raksasa. Anda melihat manusia sebagai komponen yang bisa diganti oleh algoritma.",
-            mbtiMatch: "INTJ (Architect)",
-            weakness: "Kematian jiwa dan ekosistem.",
-            color: "from-indigo-700 to-violet-950"
-        };
-    }
-
-    // 3. The Eco-Fanatic (High Env, Low Eco + Kno)
-    if (Lingkungan > 80 && Ekonomi < 40) {
-        return {
-            title: "The Gaia Zealot",
-            subtitle: "Return to Monke",
-            analysis: "Anda membenci peradaban modern. Visi Anda adalah mengembalikan kota menjadi hutan rimba, meskipun itu berarti kemiskinan dan kelaparan massal. Idealisme Anda berbahaya bagi perut rakyat.",
-            mbtiMatch: "INFP-T (Mediator Extreme)",
-            weakness: "Runtuhnya rantai pasok logistik.",
-            color: "from-emerald-600 to-teal-900"
-        };
-    }
-
-    // 4. The Populist Demagogue (High Hap, Low Kno + Eco)
-    if (Kebahagiaan > 85 && Pengetahuan < 40) {
-        return {
-            title: "The Charismatic Deceiver",
-            subtitle: "Bread & Circus King",
-            analysis: "Anda membius rakyat dengan hiburan dan subsidi palsu. Mereka mencintai Anda karena Anda memberi gula, bukan obat. Anda menciptakan bangsa yang bahagia namun bodoh dan miskin.",
-            mbtiMatch: "ESFP (Entertainer)",
-            weakness: "Pembodohan massal jangka panjang.",
-            color: "from-rose-500 to-pink-800"
-        };
-    }
-
-    // 5. The Perfect Balancer (High Total, Low Variance)
-    if (total > 300 && variance < 20) {
-        return {
-            title: "The Philosopher King",
-            subtitle: "Enlightened Grandmaster",
-            analysis: "Sangat langka. AI kesulitan menemukan celah psikologis Anda. Anda menyeimbangkan profit dan moralitas dengan presisi bedah. Anda bukan politisi, Anda adalah fenomena sejarah.",
-            mbtiMatch: "ENFJ (Protagonist)",
-            weakness: "Perfeksionisme yang melelahkan.",
-            color: "from-cyan-500 to-blue-700"
-        };
-    }
-
-    // 6. The Totalitarian Control (High Kno + Eco, Low Hap)
-    if (Pengetahuan > 70 && Ekonomi > 70 && Kebahagiaan < 40) {
-        return {
-            title: "The Big Brother",
-            subtitle: "Surveillance State Architect",
-            analysis: "Anda percaya bahwa kebebasan adalah sumber kekacauan. Anda menciptakan masyarakat yang aman, kaya, dan pintar, namun hidup dalam ketakutan dan kontrol absolut.",
-            mbtiMatch: "ISTJ (Logistician)",
-            weakness: "Hilangnya kreativitas dan kebebasan individu.",
-            color: "from-slate-700 to-gray-900"
-        };
-    }
-
-    // 7. The Failed Administrator (Low Everything)
-    if (total < 150) {
-        return {
-            title: "The Chaos Agent",
-            subtitle: "Unintentional Destroyer",
-            analysis: "Pola neural Anda menunjukkan keraguan kronis. Setiap keputusan yang Anda ambil menjadi bumerang. Kota ini terbakar bukan karena Anda jahat, tapi karena Anda tidak kompeten.",
+    // Map 16 Possibilities
+    const profiles: Record<string, PsychologicalProfile> = {
+        // 0000: Low Everything
+        '0000': {
+            title: "The Failed State",
+            subtitle: "Anarchy & Ruin",
+            analysis: "Kota Anda gagal total. Tidak ada uang, alam rusak, rakyat sengsara, dan bodoh. Ini adalah definisi neraka dunia.",
             mbtiMatch: "Unhealthy INTP",
-            weakness: "Ketidakmampuan mengambil resiko.",
-            color: "from-red-900 to-black"
-        };
-    }
-
-    // Default: The Moderate
-    return {
-        title: "The Gray Bureaucrat",
-        subtitle: "Status Quo Keeper",
-        analysis: "Anda bermain aman. Terlalu aman. Anda tidak membuat sejarah, Anda hanya mengisi formulir. Kota Anda bertahan, tapi tidak berkembang. Anda adalah manajer, bukan visioner.",
-        mbtiMatch: "ISFJ (Defender)",
-        weakness: "Mediokritas.",
-        color: "from-slate-500 to-gray-600"
+            weakness: "Ketidakmampuan Total",
+            color: "from-slate-900 to-black"
+        },
+        // 0001: Only Knowledge
+        '0001': {
+            title: "The Ivory Tower",
+            subtitle: "Isolated Academia",
+            analysis: "Kota penuh ilmuwan jenius yang hidup miskin dan sengsara di lingkungan kumuh. Pintar tapi tidak napak tanah.",
+            mbtiMatch: "INTP (Logician)",
+            weakness: "Isolasi Sosial",
+            color: "from-indigo-900 to-slate-800"
+        },
+        // 0010: Only Happiness
+        '0010': {
+            title: "The Slum Party",
+            subtitle: "Ignorant Bliss",
+            analysis: "Rakyat miskin dan hidup di lingkungan kotor, tapi anehnya mereka bahagia. Pesta pora di tengah kehancuran.",
+            mbtiMatch: "ESFP (Entertainer)",
+            weakness: "Delusi Kolektif",
+            color: "from-pink-900 to-rose-950"
+        },
+        // 0011: Happiness + Knowledge (No Money/Nature)
+        '0011': {
+            title: "The Underground Resistance",
+            subtitle: "Cyberpunk Rebels",
+            analysis: "Masyarakat cerdas dan bahagia yang hidup di bawah tanah tanpa ekonomi formal atau alam. Komunitas hacker anarkis.",
+            mbtiMatch: "ENFP (Campaigner)",
+            weakness: "Sumber Daya Langka",
+            color: "from-purple-900 to-fuchsia-900"
+        },
+        // 0100: Only Economy
+        '0100': {
+            title: "The Sweatshop City",
+            subtitle: "Industrial Hellscape",
+            analysis: "Pabrik mengepul 24 jam. Uang berlimpah, tapi rakyat depresi, bodoh, dan paru-paru mereka hitam.",
+            mbtiMatch: "ESTJ (Executive)",
+            weakness: "Pemberontakan Buruh",
+            color: "from-amber-900 to-orange-950"
+        },
+        // 0101: Economy + Knowledge (No Nature/Happiness)
+        '0101': {
+            title: "The Corporate Machine",
+            subtitle: "Soulless Efficiency",
+            analysis: "Kota super efisien. Teknologi canggih dan ekonomi kuat, tapi warganya robot tanpa jiwa yang bekerja sampai mati.",
+            mbtiMatch: "INTJ (Architect)",
+            weakness: "Krisis Mentalitas",
+            color: "from-slate-700 to-blue-900"
+        },
+        // 0110: Economy + Happiness (No Nature/Knowledge)
+        '0110': {
+            title: "The Vegas Syndrome",
+            subtitle: "Sin City",
+            analysis: "Uang dan hiburan tanpa henti. Alam rusak dan pendidikan nol. Kota yang hidup untuk dosa dan kesenangan sesaat.",
+            mbtiMatch: "ESTP (Entrepreneur)",
+            weakness: "Dekadensi Moral",
+            color: "from-yellow-700 to-red-900"
+        },
+        // 0111: Eco + Hap + Kno (No Nature) -> Wait, logic check: E,H,P High. L Low.
+        '0111': {
+            title: "The Metropolis",
+            subtitle: "Concrete Jungle",
+            analysis: "Puncak peradaban manusia modern. Kaya, pintar, dan bahagia, tapi alam telah punah diganti beton dan hologram.",
+            mbtiMatch: "ENTJ (Commander)",
+            weakness: "Kiamat Ekologis",
+            color: "from-blue-700 to-cyan-900"
+        },
+        // 1000: Only Nature
+        '1000': {
+            title: "The Wild Frontier",
+            subtitle: "Return to Monke",
+            analysis: "Hutan lebat menelan kota. Ekonomi runtuh, manusia kembali ke zaman batu. Alam menang, manusia kalah.",
+            mbtiMatch: "ISFP (Adventurer)",
+            weakness: "Kepunahan Peradaban",
+            color: "from-emerald-900 to-green-950"
+        },
+        // 1001: Nature + Knowledge
+        '1001': {
+            title: "The Hermit Sanctuary",
+            subtitle: "Monastic Wisdom",
+            analysis: "Para bijak yang hidup menyatu dengan alam. Teknologi ada tapi minim. Ekonomi stagnan demi menjaga kesucian alam.",
+            mbtiMatch: "INFJ (Advocate)",
+            weakness: "Kemiskinan Aset",
+            color: "from-teal-800 to-emerald-900"
+        },
+        // 1010: Nature + Happiness
+        '1010': {
+            title: "The Hippie Commune",
+            subtitle: "Flower Power",
+            analysis: "Hidup santai di pantai, makan kelapa, tanpa uang dan tanpa sekolah. Damai, tapi rentan hancur jika badai datang.",
+            mbtiMatch: "ISFJ (Defender)",
+            weakness: "Kerentanan Fisik",
+            color: "from-green-600 to-lime-800"
+        },
+        // 1011: Nature + Hap + Kno (No Eco)
+        '1011': {
+            title: "The Solarpunk Utopia",
+            subtitle: "Post-Scarcity Society",
+            analysis: "Masyarakat pasca-kapitalis. Teknologi hijau canggih, alam lestari, warga bahagia. Uang tidak lagi relevan di sini.",
+            mbtiMatch: "ENFJ (Protagonist)",
+            weakness: "Isolasi Ekonomi Global",
+            color: "from-emerald-500 to-cyan-600"
+        },
+        // 1100: Nature + Economy
+        '1100': {
+            title: "The Eco-Capitalist",
+            subtitle: "Green Gold",
+            analysis: "Anda berhasil memonetisasi alam. Pariwisata mahal dan tambang ramah lingkungan. Kaya dan hijau, tapi rakyat tidak bahagia.",
+            mbtiMatch: "ISTJ (Logistician)",
+            weakness: "Ketimpangan Sosial",
+            color: "from-green-800 to-yellow-800"
+        },
+        // 1101: Nature + Eco + Kno (No Hap)
+        '1101': {
+            title: "The Guided Evolution",
+            subtitle: "Benevolent Dictatorship",
+            analysis: "Semua sempurna di atas kertas: Alam, Uang, Ilmu. Tapi warga dikekang aturan ketat demi menjaga keseimbangan itu.",
+            mbtiMatch: "ISTP (Virtuoso)",
+            weakness: "Pemberontakan Sipil",
+            color: "from-teal-700 to-blue-800"
+        },
+        // 1110: Nature + Eco + Hap (No Kno)
+        '1110': {
+            title: "The Traditional Paradise",
+            subtitle: "Golden Age Kingdom",
+            analysis: "Seperti kerajaan dongeng masa lalu. Makmur, indah, dan damai. Tapi tanpa inovasi, kota ini akan tertinggal zaman.",
+            mbtiMatch: "ESFJ (Consul)",
+            weakness: "Stagnasi Teknologi",
+            color: "from-amber-600 to-green-700"
+        },
+        // 1111: High Everything
+        '1111': {
+            title: "The Philosopher King",
+            subtitle: "True Utopia",
+            analysis: "Pencapaian mustahil. Anda menyeimbangkan segalanya dengan sempurna. Anda bukan politisi, Anda adalah legenda hidup.",
+            mbtiMatch: "INFJ (The Rarest)",
+            weakness: "Tidak Ada (Sempurna)",
+            color: "from-indigo-500 via-purple-500 to-pink-500"
+        }
     };
+
+    return profiles[signature] || profiles['0000'];
 };
 
 // Reuse previous massive event pool
